@@ -29,6 +29,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -37,6 +40,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+
+    //  Utils
+    implementation 'net.time4j:time4j-android:4.8-2021a'
+    implementation 'com.github.kizitonwose:CalendarView:1.0.4'
 
     // Tests
     testImplementation 'junit:junit:4.13.2'
