@@ -91,6 +91,10 @@ class CalendarActivity : AppCompatActivity() {
             binding.currentMonthText.text = "$month $year".uppercase()
         }
 
+        binding.todayButton.setOnClickListener {
+            binding.calendarView.smoothScrollToDate(dateChangedNotifier.currentState)
+        }
+
         binding.calendarView.setup(firstMonth, lastMonth, firstDayOfWeek)
     }
 
