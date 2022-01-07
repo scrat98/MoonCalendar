@@ -1,6 +1,8 @@
 package com.example.mooncalendar.utils
 
 import com.example.mooncalendar.R
+import net.time4j.Moment
+import net.time4j.scale.TimeScale
 import java.time.*
 
 private typealias Time4JMoonPhase = net.time4j.calendar.astro.MoonPhase
@@ -43,19 +45,21 @@ class MoonPhaseCalculator {
     private val calculated = mutableMapOf<YearMonth, List<Pair<Instant, Time4JMoonPhase>>>()
 
     fun getPhase(date: LocalDate, zone: ZoneId): MoonPhase {
+        val startOfTheDay = date
+            .atTime(LocalTime.MIN)
+            .atZone(zone)
+            .withZoneSameInstant(ZoneOffset.UTC)
         val endOfTheDay = date
             .atTime(LocalTime.MAX)
             .atZone(zone)
             .withZoneSameInstant(ZoneOffset.UTC)
+
+        val phases = (
+                getOrCalculate(YearMonth.from(startOfTheDay)) +
+                getOrCalculate(YearMonth.from(endOfTheDay))
+                ).toSet()
+
         val endOfTheDayUtc = endOfTheDay.toInstant()
-        val yearMonth = YearMonth.from(endOfTheDay)
-
-        val phases = calculated.computeIfAbsent(yearMonth) {
-            val startOfTheMonth = yearMonth.startOfTheMonth()
-            val endOfTheMonth = yearMonth.endOfTheMonth()
-            findMomentsForAllMoonPhases(startOfTheMonth..endOfTheMonth)
-        }
-
         val found = phases.findLast { !it.first.isAfter(endOfTheDayUtc) }
         return if (found == null) {
             phases.first().second.toMoonPhase().prevPhase()
@@ -66,6 +70,20 @@ class MoonPhaseCalculator {
             } else {
                 found.second.toMoonPhase().nextPhase()
             }
+        }
+    }
+
+    private fun getOrCalculate(yearMonth: YearMonth): List<Pair<Instant, Time4JMoonPhase>> {
+        return calculated.computeIfAbsent(yearMonth) {
+            val startOfTheMonth = yearMonth
+                .atDay(1)
+                .atTime(LocalTime.MIN)
+                .toInstant(ZoneOffset.UTC)
+            val endOfTheMonth = yearMonth
+                .atEndOfMonth()
+                .atTime(LocalTime.MAX)
+                .toInstant(ZoneOffset.UTC)
+            findMomentsForAllMoonPhases(startOfTheMonth..endOfTheMonth)
         }
     }
 
@@ -90,5 +108,17 @@ class MoonPhaseCalculator {
             .takeWhile { it.isBeforeOrEqual(endMoment) }
             .map { it.toInstant() }
             .toList()
+    }
+
+    private fun Instant.toMoment(): Moment {
+        return Moment.of(this.epochSecond, this.nano, TimeScale.POSIX)
+    }
+
+    private fun Moment.toInstant(): Instant {
+        return Instant.ofEpochSecond(this.posixTime, this.nanosecond.toLong())
+    }
+
+    private fun Moment.isBeforeOrEqual(temporal: Moment): Boolean {
+        return !this.isAfter(temporal)
     }
 }
