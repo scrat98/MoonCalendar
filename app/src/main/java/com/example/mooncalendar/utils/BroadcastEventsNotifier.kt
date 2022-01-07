@@ -37,13 +37,13 @@ abstract class BroadcastEventsNotifier<T : Any>(
         consumer.accept(ChangedEvent(currentState, currentState))
     }
 
-    abstract val actions: Set<String>
-
-    abstract fun updateState(action: Intent): T
-
     fun getIntentFilter() = IntentFilter().apply {
         actions.forEach { addAction(it) }
     }
+
+    abstract val actions: Set<String>
+
+    abstract fun updateState(action: Intent): T
 }
 
 class DateChangedNotifier : BroadcastEventsNotifier<LocalDate>(LocalDate.now()) {
