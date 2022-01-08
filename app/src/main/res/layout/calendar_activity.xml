@@ -57,6 +57,30 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <LinearLayout
+            android:id="@+id/notification_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/notification_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Notify" />
+
+            <Spinner
+                android:id="@+id/notification_moon_phases"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:clickable="false"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
         <include
             android:id="@+id/legendLayout"
             layout="@layout/calendar_day_legend"
