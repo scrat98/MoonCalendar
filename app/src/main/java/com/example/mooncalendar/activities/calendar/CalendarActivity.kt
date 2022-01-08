@@ -3,6 +3,8 @@ package com.example.mooncalendar.activities.calendar
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.view.children
 import com.example.mooncalendar.R
+import com.example.mooncalendar.activities.widget.CalendarWidget
 import com.example.mooncalendar.databinding.CalendarActivityBinding
 import com.example.mooncalendar.utils.*
 import net.time4j.android.ApplicationStarter
@@ -151,6 +154,7 @@ class CalendarActivity : AppCompatActivity() {
             binding.calendarView.notifyDateChanged(it.after)
             binding.calendarView.scrollToDate(it.after)
             handleNotification(it)
+            handleUpdateWidget(it)
         }
     }
 
@@ -165,6 +169,18 @@ class CalendarActivity : AppCompatActivity() {
         if (state == phase) {
             showNotification(phase)
         }
+    }
+
+    private fun handleUpdateWidget(event: BroadcastEventsNotifier.ChangedEvent<LocalDate>) {
+        val intent = Intent(this, CalendarWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids = AppWidgetManager
+            .getInstance(application)
+            .getAppWidgetIds(ComponentName(application, CalendarWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        intent.putExtra("phase", moonPhaseCalculator.getPhase(event.after, ZoneId.systemDefault()))
+        intent.putExtra("date", event.after)
+        sendBroadcast(intent)
     }
 
     private fun showNotification(moonPhase: MoonPhase) {
